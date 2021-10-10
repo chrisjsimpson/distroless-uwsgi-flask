@@ -8,7 +8,7 @@ Goals: Can we containerize uwsgi and flask to run distroless?
 - Play with uwsgi dynamically scale the number of running workers , very cool, using [The uWSGI cheaper subsystem](https://uwsgi-docs.readthedocs.io/en/latest/Cheaper.html)
 - Observe the resources used (amount of RAM, and image size) because these impact cost
   - Total size: ~92MB with required pythong libraries, uwsgi + flask
-  - Memory footprint: It depends no the number of processes you spawn (that's the point of uwsgi's dynamic scaling of workers). With a single process and no workers, the total RAM used of a container running cold is: 22.76MiB (but you would probably not want to do that, instead use uwsgi's `--cheaper-algo busyness` setting(s) and set an inital number of processes (`--cheaper-initial 16`). See `entrypoint.sh` for an example. Note this is at odds with the 'single process per container' mantra, but is justified in this context, because, the reverse could be starting new containers at increased load e.g. using a [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), but actually, uwsgi would be *faster* at spawning new workers within the container than starting a new container and waiting for `uwsgi` to start, the memory footprint is also smaller. When would you scale the number of containers? Perhaps for *availability* and redundancy reasons
+  - Memory footprint: It depends on the number of processes you spawn (that's the point of uwsgi's dynamic scaling of workers). With a single process and no workers, the total RAM used of a container running cold is: 22.76MiB (but you would probably not want to do that, instead use uwsgi's `--cheaper-algo busyness` setting(s) and set an inital number of processes (`--cheaper-initial 16`). See `entrypoint.sh` for an example. Note this is at odds with the 'single process per container' mantra, but is justified in this context, because, the reverse could be starting new containers at increased load e.g. using a [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), but actually, uwsgi would be *faster* at spawning new workers within the container than starting a new container and waiting for `uwsgi` to start, the memory footprint is also smaller. When would you scale the number of containers? Perhaps for *availability* and redundancy reasons
 
 - Complexity. How complex is this to do?
 
@@ -16,6 +16,7 @@ Why?
 
 - Smaller images , less memory footprint
 - Less code shipped generally a good thing
+- Is it more secure? It depends. [See also](https://github.com/GoogleContainerTools/distroless/issues/733)
 - Fun and interesting learning
 - uwsgi is so very flexible, seems to be used / mentioned less in the cloud native world (does it have a place?)
   - The art of the possible
